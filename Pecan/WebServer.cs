@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,8 +13,8 @@ namespace Pecan
     public class WebServer
     {
         private readonly HttpListener httpListener;
-        private readonly Dictionary<string, Func<HttpListenerContext, Task<object>>> matchers =
-            new Dictionary<string, Func<HttpListenerContext, Task<object>>>();
+        private readonly Dictionary<(string Path, string HttpMethod), Func<HttpListenerContext, Task<object>>> matchers =
+            new Dictionary<(string, string), Func<HttpListenerContext, Task<object>>>();
 
         public WebServer() : this(new HttpListener())
         {
@@ -24,9 +25,9 @@ namespace Pecan
             this.httpListener = httpListener ?? throw new ArgumentNullException(nameof(httpListener));
         }
 
-        public void MapGet(string path, Func<HttpListenerContext, Task<object>> handler)
+        public void Map(string path, HttpMethod httpMethod, Func<HttpListenerContext, Task<object>> handler)
         {
-            this.matchers.Add(path.ToUpperInvariant(), handler);
+            this.matchers.Add((path.ToUpperInvariant(), httpMethod.Method.ToUpperInvariant()), handler);
         }
 
         public Task RunAsync()
@@ -55,7 +56,9 @@ namespace Pecan
                 var context = await httpListener.GetContextAsync()
                     .ConfigureAwait(false);
 
-                if (matchers.TryGetValue(context.Request.Url.AbsolutePath.ToUpperInvariant(), out var handler))
+                var key = (context.Request.Url.AbsolutePath.ToUpperInvariant(), context.Request.HttpMethod.ToUpperInvariant());
+
+                if (matchers.TryGetValue(key, out var handler))
                 {
                     object response = await handler(context)
                         .ConfigureAwait(false);

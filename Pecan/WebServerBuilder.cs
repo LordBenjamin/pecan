@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Pecan
@@ -8,8 +11,8 @@ namespace Pecan
     public class WebServerBuilder
     {
         private HttpListener httpListener;
-        private readonly List<(string Path, Func<HttpListenerContext, Task<object>> Handler)> handlers =
-            new List<(string, Func<HttpListenerContext, Task<object>>)>();
+        private readonly List<(string Path, HttpMethod HttpMethod, Func<HttpListenerContext, Task<object>> Handler)> handlers =
+            new List<(string, HttpMethod, Func<HttpListenerContext, Task<object>>)>();
 
         public WebServerBuilder()
         {
@@ -18,7 +21,27 @@ namespace Pecan
 
         public WebServerBuilder MapGet(string path, Action<HttpListenerContext> handler)
         {
-            this.handlers.Add((path, context =>
+            return Map(path, HttpMethod.Get, handler);
+        }
+
+        public WebServerBuilder MapGet(string path, Func<HttpListenerContext, object> handler)
+        {
+            return Map(path, HttpMethod.Get, handler);
+        }
+
+        public WebServerBuilder MapGet(string path, Func<HttpListenerContext, Task> handler)
+        {
+            return Map(path, HttpMethod.Get, handler);
+        }
+
+        public WebServerBuilder MapGet(string path, Func<HttpListenerContext, Task<object>> handler)
+        {
+            return Map(path, HttpMethod.Get, handler);
+        }
+
+        public WebServerBuilder Map(string path, HttpMethod httpMethod, Action<HttpListenerContext> handler)
+        {
+            this.handlers.Add((path, HttpMethod.Get, context =>
             {
                 handler(context);
                 return Task.FromResult(VoidHolder.AsObject);
@@ -28,15 +51,15 @@ namespace Pecan
             return this;
         }
 
-        public WebServerBuilder MapGet(string path, Func<HttpListenerContext, object> handler)
+        public WebServerBuilder Map(string path, HttpMethod httpMethod, Func<HttpListenerContext, object> handler)
         {
-            this.handlers.Add((path, context => Task.FromResult(handler(context))));
+            this.handlers.Add((path, httpMethod, context => Task.FromResult(handler(context))));
             return this;
         }
 
-        public WebServerBuilder MapGet(string path, Func<HttpListenerContext, Task> handler)
+        public WebServerBuilder Map(string path, HttpMethod httpMethod, Func<HttpListenerContext, Task> handler)
         {
-            this.handlers.Add((path, async context =>
+            this.handlers.Add((path, httpMethod, async context =>
             {
                 await handler(context)
                     .ConfigureAwait(false);
@@ -48,9 +71,9 @@ namespace Pecan
             return this;
         }
 
-        public WebServerBuilder MapGet(string path, Func<HttpListenerContext, Task<object>> handler)
+        public WebServerBuilder Map(string path, HttpMethod httpMethod, Func<HttpListenerContext, Task<object>> handler)
         {
-            this.handlers.Add((path, handler));
+            this.handlers.Add((path, httpMethod, handler));
             return this;
         }
 
@@ -66,7 +89,7 @@ namespace Pecan
 
             foreach (var handler in handlers)
             {
-                server.MapGet(handler.Path, handler.Handler);
+                server.Map(handler.Path, handler.HttpMethod, handler.Handler);
             }
 
             return server;
