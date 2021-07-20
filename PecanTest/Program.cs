@@ -1,4 +1,5 @@
 ﻿using Pecan;
+using Pecan.Controllers;
 using System;
 using System.Net;
 using System.Threading.Tasks;
@@ -18,6 +19,7 @@ namespace PecanTest
                     GC.Collect(2, GCCollectionMode.Forced, true);
                     return GC.GetTotalMemory(true).ToString();
                 })
+                .MapController(new TestController())
                 .RunAsync();
         }
     }
