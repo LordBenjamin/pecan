@@ -7,8 +7,19 @@ namespace Pecan.Controllers
 {
     public static class WebServerBuilderExtensions
     {
-        public static WebServerBuilder MapController<T>(this WebServerBuilder builder, T controller) where T : class
+        public static WebServerBuilder MapController<T>(this WebServerBuilder builder, T controller, string routePrefix = null) where T : class
         {
+            if (routePrefix == null)
+            {
+                routePrefix = "/" + typeof(T).Name;
+
+                int i = routePrefix.IndexOf("Controller");
+                if (i >= 0)
+                {
+                    routePrefix = routePrefix.Substring(0, i);
+                }
+            }
+
             var methods = typeof(T).GetMethods();
 
             foreach (MethodInfo method in methods)
@@ -29,6 +40,8 @@ namespace Pecan.Controllers
 
                 foreach (var attr in attributes)
                 {
+                    string route = routePrefix + "/" + method.Name;
+
                     if (parameters.Length > 1)
                     {
                         throw new InvalidOperationException("No mapping to method parameters for " + method.Name);
@@ -43,14 +56,14 @@ namespace Pecan.Controllers
                         Action<HttpListenerContext> expr = (HttpListenerContext context) =>
                             method.Invoke(controller, parameters.Length == 0 ? null : new object[] { context });
 
-                        builder.Map("/" + method.Name, attr.HttpMethod, expr);
+                        builder.Map(route, attr.HttpMethod, expr);
                     }
                     else if (method.ReturnType == typeof(Task))
                     {
                         Func<HttpListenerContext, Task> expr = (HttpListenerContext context) =>
                             (Task)method.Invoke(controller, parameters.Length == 0 ? null : new object[] { context });
 
-                        builder.Map("/" + method.Name, attr.HttpMethod, expr);
+                        builder.Map(route, attr.HttpMethod, expr);
                     }
                     else if (method.ReturnType.IsGenericType && method.ReturnType.GetGenericTypeDefinition() == typeof(Task<>))
                     {
@@ -65,14 +78,14 @@ namespace Pecan.Controllers
                             return resultProperty.GetValue(task);
                         };
 
-                        builder.Map("/" + method.Name, attr.HttpMethod, expr);
+                        builder.Map(route, attr.HttpMethod, expr);
                     }
                     else
                     {
                         Func<HttpListenerContext, object> expr = (HttpListenerContext context) =>
                             method.Invoke(controller, parameters.Length == 0 ? null : new object[] { context });
 
-                        builder.Map("/" + method.Name, attr.HttpMethod, expr);
+                        builder.Map(route, attr.HttpMethod, expr);
                     }
                 }
             }
