@@ -44,7 +44,7 @@ namespace Pecan
 
         public WebServerBuilder Map(string path, HttpMethod httpMethod, Action<HttpListenerContext> handler)
         {
-            this.handlers.Add((path, HttpMethod.Get, context =>
+            this.handlers.Add((path, httpMethod, context =>
             {
                 handler(context);
                 return Task.FromResult(VoidHolder.AsObject);
