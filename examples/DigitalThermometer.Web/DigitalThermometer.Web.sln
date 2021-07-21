@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31229.75
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DigitalThermometer.Web", "DigitalThermometer.Web.csproj", "{0C9633C1-EDE1-46F9-BDDE-8F7AFA47E4AF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pecan", "..\..\src\Pecan\Pecan.csproj", "{5EAC68E0-66CE-4270-A21F-4DEE37C0D8D5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0C9633C1-EDE1-46F9-BDDE-8F7AFA47E4AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C9633C1-EDE1-46F9-BDDE-8F7AFA47E4AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C9633C1-EDE1-46F9-BDDE-8F7AFA47E4AF}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{0C9633C1-EDE1-46F9-BDDE-8F7AFA47E4AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C9633C1-EDE1-46F9-BDDE-8F7AFA47E4AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C9633C1-EDE1-46F9-BDDE-8F7AFA47E4AF}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{5EAC68E0-66CE-4270-A21F-4DEE37C0D8D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5EAC68E0-66CE-4270-A21F-4DEE37C0D8D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5EAC68E0-66CE-4270-A21F-4DEE37C0D8D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5EAC68E0-66CE-4270-A21F-4DEE37C0D8D5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {23182D35-C1DE-47BC-820F-3D88352A4921}
+	EndGlobalSection
+EndGlobal
