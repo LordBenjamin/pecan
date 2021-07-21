@@ -6,6 +6,7 @@ using Meadow.Devices;
 using Meadow.Gateway.WiFi;
 using Meadow.Units;
 using Pecan;
+using Pecan.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -66,6 +67,8 @@ namespace BenjaminOwen.Meadow.Samples.DigitalThermometer.Web
             // create a Pecan web server
             var server = new WebServerBuilder()
                 .ListenOn(Device.WiFiAdapter.IpAddress)
+                .WithConsoleLogger()
+                .WithInMemoryLogger()
                 .MapGet("/temperature", context => Math.Round(CurrentTemperature.Celsius, 2).ToString())
                 .Start();
 

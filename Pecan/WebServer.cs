@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pecan.Logging;
+using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,21 +13,25 @@ namespace Pecan
 {
     public class WebServer
     {
+        private readonly ILogger logger;
         private readonly HttpListener httpListener;
         private readonly Dictionary<(string Path, string HttpMethod), Func<HttpListenerContext, Task<object>>> matchers =
             new Dictionary<(string, string), Func<HttpListenerContext, Task<object>>>();
 
-        public WebServer() : this(new HttpListener())
+        public WebServer()
+            : this(new HttpListener(), null)
         {
         }
 
-        public WebServer(HttpListener httpListener)
+        public WebServer(HttpListener httpListener, ILogger logger)
         {
             this.httpListener = httpListener ?? throw new ArgumentNullException(nameof(httpListener));
+            this.logger = logger;
         }
 
         public void Map(string path, HttpMethod httpMethod, Func<HttpListenerContext, Task<object>> handler)
         {
+            logger?.Log($"Mapped {httpMethod.Method} {path}");
             this.matchers.Add((path.ToUpperInvariant(), httpMethod.Method.ToUpperInvariant()), handler);
         }
 
@@ -51,12 +56,19 @@ namespace Pecan
 
         private async Task MainLoop(CancellationToken ct)
         {
+            logger?.Log($"Started");
+
             while (httpListener.IsListening && !ct.IsCancellationRequested)
             {
+                logger?.Log($"Waiting for request");
                 var context = await httpListener.GetContextAsync()
                     .ConfigureAwait(false);
 
+                Stopwatch sw = Stopwatch.StartNew();
+
                 var key = (context.Request.Url.AbsolutePath.ToUpperInvariant(), context.Request.HttpMethod.ToUpperInvariant());
+
+                logger?.Log($"{context.Request.HttpMethod} {context.Request.RawUrl}");
 
                 if (matchers.TryGetValue(key, out var handler))
                 {
@@ -79,6 +91,11 @@ namespace Pecan
                             await context.Response.OutputStream.WriteAsync(buffer, 0, count)
                                 .ConfigureAwait(false);
                         }
+                        catch (Exception ex)
+                        {
+                            logger?.Log($"Error processing request: {ex}");
+                            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        }
                         finally
                         {
                             ArrayPool<byte>.Shared.Return(buffer);
@@ -92,7 +109,11 @@ namespace Pecan
 
             completeRequest:
                 context.Response.Close();
+
+                logger?.Log($"{context.Response.StatusCode} ({sw.ElapsedMilliseconds:n0} ms)");
             }
+
+            logger?.Log($"Stopped");
         }
 
         public void Stop()

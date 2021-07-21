@@ -1,5 +1,6 @@
 ﻿using Pecan;
 using Pecan.Controllers;
+using Pecan.Logging;
 using System;
 using System.Net;
 using System.Threading.Tasks;
@@ -12,6 +13,8 @@ namespace PecanTest
         {
             await new WebServerBuilder()
                 .ListenOn(IPAddress.Parse("127.0.0.1"), 1337)
+                .WithConsoleLogger()
+                .WithInMemoryLogger()
                 .MapGet("/test-async", async context => await Task.FromResult("async"))
                 .MapGet("/test", context => "not async")
                 .MapGet("/gc", context =>

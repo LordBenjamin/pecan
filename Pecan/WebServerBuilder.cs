@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pecan.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -13,6 +14,8 @@ namespace Pecan
         private HttpListener httpListener;
         private readonly List<(string Path, HttpMethod HttpMethod, Func<HttpListenerContext, Task<object>> Handler)> handlers =
             new List<(string, HttpMethod, Func<HttpListenerContext, Task<object>>)>();
+
+        public List<ILogger> Loggers { get; } = new List<ILogger>();
 
         public WebServerBuilder()
         {
@@ -85,7 +88,17 @@ namespace Pecan
 
         public WebServer Build()
         {
-            var server = new WebServer(httpListener);
+            ILogger logger = null;
+            if (Loggers.Count == 1)
+            {
+                logger = Loggers[0];
+            }
+            else if (Loggers.Count > 1)
+            {
+                logger = new AggregateLogger(Loggers);
+            }
+
+            var server = new WebServer(httpListener, logger);
 
             foreach (var handler in handlers)
             {
