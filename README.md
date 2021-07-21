@@ -7,7 +7,7 @@ await Device.WiFiAdapter.Connect("[SSID]", "[PASSWORD]");
 
 var server = new WebServerBuilder()
     .ListenOn(Device.WiFiAdapter.IpAddress)
-    .MapGet("/hi", () => "Hello, World!")
+    .MapGet("/hi", _ => "Hello, Pecan!")
     .Build();
 
 Console.WriteLine($"Pecan listening at: http://{Device.WiFiAdapter.IpAddress}/hi");
