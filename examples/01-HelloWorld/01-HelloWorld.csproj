@@ -8,7 +8,6 @@
   <ItemGroup>
     <PackageReference Include="Meadow.F7" Version="0.*" />
     <PackageReference Include="Meadow.Foundation" Version="0.*" />
-    <PackageReference Include="Meadow.Units" Version="0.24.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Pecan\Pecan.csproj" />

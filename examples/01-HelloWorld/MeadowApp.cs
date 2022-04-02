@@ -1,7 +1,6 @@
 ﻿using Meadow;
 using Meadow.Devices;
 using Meadow.Gateway.WiFi;
-using Meadow.Units;
 using Pecan;
 using System;
 using System.Threading;
@@ -23,7 +22,7 @@ namespace BenjaminOwen.Meadow.Samples.DigitalThermometer.Web
             Console.WriteLine("Initialize WiFi...");
 
             // initialize the wifi adapter
-            if (!Device.InitWiFiAdapter().Result)
+            if (!Device.WiFiAdapter.StartWiFiInterface())
             {
                 throw new Exception("Could not initialize the WiFi adapter.");
             }
