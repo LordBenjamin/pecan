@@ -46,8 +46,7 @@ namespace Pecan
             {
                 handler(context);
                 return Task.FromResult(VoidHolder.AsObject);
-            }
-            ));
+            }));
 
             return this;
         }
