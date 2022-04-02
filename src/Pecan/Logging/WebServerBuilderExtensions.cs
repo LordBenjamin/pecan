@@ -1,4 +1,5 @@
-﻿using System.Buffers;
+﻿using System;
+using System.Buffers;
 using System.Text;
 
 namespace Pecan.Logging
@@ -23,11 +24,12 @@ namespace Pecan.Logging
 
             builder.MapGet(route, context =>
             {
-                context.Response.OutputStream.Write(bodyStartTagBytes);
 
                 string[] entries = ArrayPool<string>.Shared.Rent(capacity);
                 try
                 {
+                    context.Response.OutputStream.Write(bodyStartTagBytes);
+
                     int count = logger.Read(entries, capacity);
 
                     for (int i = 0; i < count; i++)
@@ -47,11 +49,18 @@ namespace Pecan.Logging
 
                         context.Response.OutputStream.Write(lineBreakBytes);
                     }
-                } finally
+
+                    context.Response.OutputStream.Write(bodyEndTagBytes);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    throw;
+                }
+                finally
                 {
                     ArrayPool<string>.Shared.Return(entries);
                 }
-                context.Response.OutputStream.Write(bodyEndTagBytes);
             });
 
             return builder;
