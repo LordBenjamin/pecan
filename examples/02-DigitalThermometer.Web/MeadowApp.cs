@@ -1,8 +1,8 @@
 ﻿using BenjaminOwen.Meadow.Displays;
-using BenjaminOwen.Meadow.Sensors.Temperature;
 using DigitalThermometer.Web;
 using Meadow;
 using Meadow.Devices;
+using Meadow.Foundation.Sensors.Temperature;
 using Meadow.Gateway.WiFi;
 using Meadow.Units;
 using Pecan;
@@ -16,7 +16,7 @@ namespace BenjaminOwen.Meadow.Samples.DigitalThermometer.Web
     public class MeadowApp : App<F7Micro, MeadowApp>
     {
         private readonly MAX7219 display;
-        private readonly TMP36 tmp36;
+        private readonly AnalogTemperature tmp36;
 
         public MeadowApp()
         {
@@ -29,7 +29,7 @@ namespace BenjaminOwen.Meadow.Samples.DigitalThermometer.Web
                 clk: Device.Pins.D02,
                 displayCount: 1);
 
-            tmp36 = new TMP36(Device, Device.Pins.A00);
+            tmp36 = new AnalogTemperature(Device, Device.Pins.A00, AnalogTemperature.KnownSensorType.TMP36);
         }
 
         public Temperature CurrentTemperature { get; private set; }
@@ -48,7 +48,7 @@ namespace BenjaminOwen.Meadow.Samples.DigitalThermometer.Web
             Console.WriteLine("Initialize WiFi...");
 
             // initialize the wifi adapter
-            if (!Device.InitWiFiAdapter().Result)
+            if (!Device.WiFiAdapter.StartWiFiInterface())
             {
                 throw new Exception("Could not initialize the WiFi adapter.");
             }
@@ -80,7 +80,7 @@ namespace BenjaminOwen.Meadow.Samples.DigitalThermometer.Web
             // Poll TMP36 and update display when temperature changes
             while (true)
             {
-                CurrentTemperature = await tmp36.ReadAsync()
+                CurrentTemperature = await tmp36.Read()
                     .ConfigureAwait(false);
 
                 int roundedTemperature = (int)Math.Round(CurrentTemperature.Celsius, 0);
